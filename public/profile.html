@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Profile</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h2>Profile</h2>
+        <input type="text" placeholder="Username" id="username">
+        <input type="text" placeholder="Avatar URL" id="avatar">
+        <textarea placeholder="Bio" id="bio"></textarea>
+        <button id="save-btn">Save Profile</button>
+        <button id="logout-btn"></button>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        requireAuth();
+
+        const user = JSON.parse(localStorage.getItem('user'));
+        document.getElementById('username').value = user.username;
+        document.getElementById('avatar').value = user.avatar || '';
+        document.getElementById('bio').value = user.bio || '';
+
+        document.getElementById('save-btn').addEventListener('click', async () => {
+            const updated = {
+                username: document.getElementById('username').value,
+                avatar: document.getElementById('avatar').value,
+                bio: document.getElementById('bio').value
+            };
+
+            const res = await fetchWithAuth(`${API_URL}/auth/update`, {
+                method: 'PUT',
+                body: JSON.stringify(updated)
+            });
+
+            if (res.username) {
+                localStorage.setItem('user', JSON.stringify(res));
+                alert('Profile updated!');
+            } else {
+                alert(res.error || 'Failed to update');
+            }
+        })
+
+        document.getElementById('logout-btn').addEventListener('click', () => {
+            localStorage.clear();
+            window.location.href = 'index.html';
+        });
+    </script>
+</body>
+</html>

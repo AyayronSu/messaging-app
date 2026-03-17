@@ -32,4 +32,32 @@ router.post('/login', async (req, res) => {
     }
 });
 
+router.put('/update', async (req, res) => {
+    const token = req.header('Authorization')?.split(' ')[1];
+    if (!token) return res.status(401).json({ error: 'No token' });
+
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+        const updatedUser = await User.findByIdAndUpdate(
+            decoded.id,
+            {
+                username: req.body.username,
+                avatar: req.body.avatar,
+                bio: req.body.bio
+            },
+            { new: true }
+        ).select('-password');
+
+        res.json(updatedUser);
+    } catch (err) {
+        res.status(400).json({ error: err.message });
+    }
+});
+
+router.get('/users', async (req, res) => {
+    const users = await User.find().select('_id username');
+    res.json(users);
+});
+
 module.exports = router;
